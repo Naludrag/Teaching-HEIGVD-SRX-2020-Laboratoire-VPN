@@ -146,7 +146,7 @@ Pour votre topologie il est utile de contrôler la connectivité entre :
 
 ---
 
-**Réponse :**  
+Nous avons juste eu besoin de lancer la commande `ip dhcp` sur le VPC. Une fois cela effectuée, tous les pings sont passées.
 
 ---
 
