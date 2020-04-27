@@ -108,7 +108,8 @@ Un « protocol » différent de `up` indique la plupart du temps que l’interfa
 
 ---
 
-**Réponse :**  
+Nous n'avons pas rencontré de problèmes. Tous les routeurs ont démarrés normalement et ils étaient bien configuré.
+La seul différence est le routeur R2 qui possèdait une interface loopback non-spécifié dans le schéma. Nous ne pensons toutefois pas que cela ai d'importance.
 
 ---
 
@@ -145,7 +146,7 @@ Pour votre topologie il est utile de contrôler la connectivité entre :
 
 ---
 
-**Réponse :**  
+Nous avons juste eu besoin de lancer la commande `ip dhcp` sur le VPC. Une fois cela effectuée, tous les pings sont passées.
 
 ---
 
