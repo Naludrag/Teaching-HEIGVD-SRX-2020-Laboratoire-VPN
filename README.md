@@ -108,7 +108,8 @@ Un « protocol » différent de `up` indique la plupart du temps que l’interfa
 
 ---
 
-**Réponse :**  
+Nous n'avons pas rencontré de problèmes. Tous les routeurs ont démarrés normalement et ils étaient bien configuré.
+La seul différence est le routeur R2 qui possèdait une interface loopback non-spécifié dans le schéma. Nous ne pensons toutefois pas que cela ai d'importance.
 
 ---
 
