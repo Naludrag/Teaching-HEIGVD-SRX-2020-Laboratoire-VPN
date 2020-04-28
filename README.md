@@ -13,7 +13,7 @@ Clonez le repo sur votre machine. Vous pouvez répondre aux questions en modifia
 **N'oubliez pas de spécifier les noms des membres du groupes dans la Pull Request ainsi que dans le mail de rendu !!!**
 
 
-## Echéance 
+## Echéance
 
 Ce travail devra être rendu le dimanche après la fin de la 2ème séance de laboratoire, soit au plus tard, **le 11 mai 2020, à 23h59.**
 
@@ -30,8 +30,8 @@ Dans ce travail de laboratoire, vous allez configurer des routeurs Cisco émulé
 -	Capture Sniffer avec filtres précis sur la communication à épier
 -	Activation du mode « debug » pour certaines fonctions du routeur
 -	Observation des protocoles IPSec
- 
- 
+
+
 ## Matériel
 
 La manière la plus simple de faire ce laboratoire est dans les machines des salles de labo. Le logiciel d'émulation c'est eve-ng. Vous trouverez un [guide très condensé](files/Fonctionnement_EVE-NG.pdf) pour l'utilisation de eve-ng ici.
@@ -53,7 +53,7 @@ Ensuite, terminez la configuration de la VM, connectez vous et récupérez l'adr
 Utilisez un navigateur internet (hors VM) et tapez l'adresse IP de la VM.
 
 
-## Fichiers nécessaires 
+## Fichiers nécessaires
 
 Tout ce qu'il vous faut c'est un [fichier de projet eve-ng](files/eve-ng_Labo_VPN_SRX.zip), que vous pourrez importer directement dans votre environnement de travail.
 
@@ -66,7 +66,7 @@ Les "machines" du LAN1 (connecté au ISP1) sont simulées avec l'interface loopb
 
 ![Topologie du réseau](images/topologie.png)
 
-Voici le projet eve-ng utilisé pour implémenter la topologie. Le réseau Internet (nuage) est simulé par un routeur. 
+Voici le projet eve-ng utilisé pour implémenter la topologie. Le réseau Internet (nuage) est simulé par un routeur.
 
 ![Topologie eve-ng](images/topologie-eve-ng.png)
 
@@ -77,7 +77,7 @@ Voici le projet eve-ng utilisé pour implémenter la topologie. Le réseau Inter
 - Prenez un peu de temps pour vous familiariser avec la topologie présentée dans ce guide et comparez-la au projet eve-ng. Identifiez les éléments, les interconnexions et les adresses IPs.
 - À tout moment, il vous est possible de sauvegarder la configuration dans la mémoire de vos routeurs :
 	- Au Shell privilégié (symbole #) entrer la commande suivante pour sauvegarder la configuration actuelle dans la mémoire nvram du routeur : ```wr```
-	- Vous **devez** faire des sauvegardes de la configuration (exporter) dans un fichier - c.f. [document guide eve-ng](files/Fonctionnement_EVE-NG.pdf) 
+	- Vous **devez** faire des sauvegardes de la configuration (exporter) dans un fichier - c.f. [document guide eve-ng](files/Fonctionnement_EVE-NG.pdf)
 
 
 ### Vérification de la configuration de base des routeurs
@@ -120,7 +120,7 @@ La seul différence est le routeur R2 qui possèdait une interface loopback non-
 Les commandes utiles sont les suivantes :
 
 ```
-R2# show ip dhcp pool 
+R2# show ip dhcp pool
 R2# show ip dhcp binding
 ```
 
@@ -161,7 +161,7 @@ R2# debug ip icmp
 ```
 Pour déclencher et pratiquer les captures vous allez « pinger » votre routeur R1 avec son IP=193.100.100.1 depuis votre « VPC ». Durant cette opération vous tenterez d’obtenir en simultané les informations suivantes :
 
--	Une trace sniffer (Wireshark) à la sortie du routeur R2 vers Internet. Si vous ne savez pas utiliser Wireshark avec eve-ng, référez-vous au document explicatif eve-ng. Le filtre de **capture** (attention, c'est un filtre de **capture** et pas un filtre d'affichage) suivant peut vous aider avec votre capture : `ip host 193.100.100.1`. 
+-	Une trace sniffer (Wireshark) à la sortie du routeur R2 vers Internet. Si vous ne savez pas utiliser Wireshark avec eve-ng, référez-vous au document explicatif eve-ng. Le filtre de **capture** (attention, c'est un filtre de **capture** et pas un filtre d'affichage) suivant peut vous aider avec votre capture : `ip host 193.100.100.1`.
 -	Les messages de R1 avec `debug ip icmp`.
 
 
@@ -240,7 +240,10 @@ Vous pouvez consulter l’état de votre configuration IKE avec les commandes su
 
 ---
 
-**Réponse :**  
+La commande nous montre les policy que nous avons mis en place grâce à la commande `crypto isakmp numéro_policy`. On peut donc constater que ce que nous avons comme résultat est bien celui désiré en comparaison avec le tableau représenté ci-dessus.
+
+Nous avons ajoutés une policy supplémentaire pour le routeur R2 avec comme encryption triple DES avec une priorité plus haute mais comme le routeur R1 n'utilise que l'encryption aes seul la policy 20 va être utilisée.  
+En plus de cela la policy 10 n'est pas très performante car nous utilisons du triple DES qui nettement plus lent que AES. Elle n'est aussi pas très fiable car nous utilisons md5 qui est déprécié pour ce genre d'échange. La clé Diffie-Hellman est également plus petite elle est de 1024 bit(`group 2`).
 
 ---
 
@@ -249,7 +252,8 @@ Vous pouvez consulter l’état de votre configuration IKE avec les commandes su
 
 ---
 
-**Réponse :**  
+Cette commande permet de voir les clés configurées sur un routeur.  
+On peut donc voir que la clé `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé. Ce qui est déconseiléé en pratqieu car si la clé est trouvé par une personne tierce il peut dechiffrer tout les paquets qui sont transmis par les routeurs.
 
 ---
 
@@ -274,13 +278,13 @@ Les commandes de configurations sur R1 ressembleront à ce qui suit :
 ```
 crypto ipsec security-association lifetime kilobytes 2560
 crypto ipsec security-association lifetime seconds 300
-crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac 
+crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac
   ip access-list extended TO-CRYPT
   permit ip 172.16.1.0 0.0.0.255 172.17.1.0 0.0.0.255
-crypto map MY-CRYPTO 10 ipsec-isakmp 
+crypto map MY-CRYPTO 10 ipsec-isakmp
   set peer 193.200.200.1
   set security-association idle-time 900
-  set transform-set STRONG 
+  set transform-set STRONG
   match address TO-CRYPT
 ```
 
@@ -289,14 +293,14 @@ Les commandes de configurations sur R2 ressembleront à ce qui suit :
 ```
 crypto ipsec security-association lifetime kilobytes 2560
 crypto ipsec security-association lifetime seconds 300
-crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac 
+crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac
   mode tunnel
   ip access-list extended TO-CRYPT
   permit ip 172.17.1.0 0.0.0.255 172.16.1.0 0.0.0.255
-crypto map MY-CRYPTO 10 ipsec-isakmp 
+crypto map MY-CRYPTO 10 ipsec-isakmp
   set peer 193.100.100.1
   set security-association idle-time 900
-  set transform-set STRONG 
+  set transform-set STRONG
   match address TO-CRYPT
 ```
 
@@ -311,7 +315,7 @@ show crypto map
 
 ## Activation IPsec & test
 
-Pour activer cette configuration IKE & IPsec il faut appliquer le « crypto map » sur l’interface de sortie du trafic où vous voulez que l’encryption prenne place. 
+Pour activer cette configuration IKE & IPsec il faut appliquer le « crypto map » sur l’interface de sortie du trafic où vous voulez que l’encryption prenne place.
 
 Sur R1 il s’agit, selon le schéma, de l’interface « Ethernet0/0 » et la configuration sera :
 
@@ -336,7 +340,7 @@ Pour tester si votre VPN est correctement configuré vous pouvez maintenant lanc
 debug ip icmp
 ```
 
-Pensez à démarrer votre sniffer sur la sortie du routeur R2 vers internet avant de démarrer votre ping, collectez aussi les éventuels messages à la console des différents routeurs. 
+Pensez à démarrer votre sniffer sur la sortie du routeur R2 vers internet avant de démarrer votre ping, collectez aussi les éventuels messages à la console des différents routeurs.
 
 **Question 6: Ensuite faites part de vos remarques dans votre rapport. :**
 
@@ -364,7 +368,7 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-**Réponse :**  
+IKE a été utilisé pour la mise en place pour l'échange de clé. Puis, ESP a été utilisé pour le chiffrement de la payload du paquet.
 
 ---
 
@@ -373,7 +377,17 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-**Réponse :**  
+Nous avons configuré le mode tunnnel au moment de la commande `crypto ipsec` pour mettre en place IPSec.
+
+    crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac
+      mode tunnel
+
+Comme cette commande a été lancée sur le routeur R2, le routeur R1 va également l'utilsé lors de la communication.
+Nous aurons donc un mode tunnnel.
+
+il est également possible de voir que c'est bien le mode tunnel qui est utilisé en regardant les paquets dans Wireshark. Il est possible de constater que l'entête IP a été modifié.
+
+##Capture à ajouter
 
 ---
 
@@ -382,7 +396,9 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-**Réponse :**  
+Tout le contenu original du paquet est chiffré(Entête IP, entête TCP et les données). Nous pouvons affirmer cela car comme nous avons vu en cours quand nous utilisons le mode Tunnel(ce qui est le cas ici) tout le paquet IP original est chiffré.
+
+Le chiffrement utilisé est AES-192 ce qui nous indique que nous uilisons AES avec une clé de 192 bits.
 
 ---
 
@@ -391,7 +407,11 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-**Réponse :**  
+Encore une fois comme nous utilisons le mode Tunnel tout le paquet initial va être authentifié ainsi que le header ESP. Comme nous utilisons ESP nous avons repris le schéma du cours pour répondre à cette question.
+
+![](./images/Question11.PNG)
+
+Pour l'authentification nous avons mis en place l'algorithme `HMAC-SHA1`. Nous pouvons confirmer cela car nous avons l'avons indiqué avec la commande `crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac`.
 
 ---
 
@@ -400,6 +420,7 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-**Réponse :**  
+Toutes les parties du paquets vont être intègre sauf la nouvelle entête IP.  
+Le protocol utilisé est le même que pour l'autentification(`HMAC-SHA1`) et cela va permettre de mettre en place la partie ICV(Integrity Check Value) dans le paquet IP pour vérifier l'intégrité.
 
 ---
