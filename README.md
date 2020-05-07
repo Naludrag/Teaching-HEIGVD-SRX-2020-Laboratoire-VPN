@@ -109,7 +109,7 @@ Un « protocol » différent de `up` indique la plupart du temps que l’interfa
 ---
 
 Nous n'avons pas rencontré de problèmes. Tous les routeurs ont démarrés normalement et ils étaient bien configuré.
-La seul différence est le routeur R2 qui possèdait une interface loopback non-spécifié dans le schéma. Nous ne pensons toutefois pas que cela ai d'importance.
+La seul différence est le routeur R2 qui possèdait une interface loopback non-spécifié dans le schéma. Nous ne pensons toutefois pas que cela soit problématique.
 
 ---
 
@@ -146,7 +146,7 @@ Pour votre topologie il est utile de contrôler la connectivité entre :
 
 ---
 
-Nous avons juste eu besoin de lancer la commande `ip dhcp` sur le VPC. Une fois cela effectuée, tous les pings sont passées.
+Nous avons juste eu besoin de lancer la commande `ip dhcp` sur le VPC. Une fois cela effectuée, tous les pings sont passés.
 
 ---
 
@@ -169,7 +169,11 @@ Pour déclencher et pratiquer les captures vous allez « pinger » votre routeur
 
 ---
 
-**Screenshots :**  
+La capture d'écran ci-dessous contient la console du VPC, la console de R1 ainsi qu'une capture wireshark sur l'interface de R2 vers internet.
+
+![Capture question 3](./images/Q3.png)
+
+On voit donc que le ping est envoyé depuis le VPC en transitant par R2. R1 reçoit ensuite les echo requests et répond avec des echo reply.
 
 ---
 
@@ -253,7 +257,7 @@ En plus de cela la policy 10 n'est pas très performante car nous utilisons du t
 ---
 
 Cette commande permet de voir les clés configurées sur un routeur.  
-On peut donc voir que la clé `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé. Ce qui est déconseiléé en pratqieu car si la clé est trouvé par une personne tierce il peut dechiffrer tout les paquets qui sont transmis par les routeurs.
+On peut donc voir que la clé `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé. Ce qui est déconseillé en pratique car si la clé est trouvé par une personne tierce il peut dechiffrer tout les paquets qui sont transmis par les deux routeurs.
 
 ---
 
@@ -346,7 +350,15 @@ Pensez à démarrer votre sniffer sur la sortie du routeur R2 vers internet avan
 
 ---
 
-**Réponse :**  
+La capture d'écran contient la console du VPC, de R1 et une capture wireshark à la sortie de R2 vers internet.
+
+![Capture question 6](./images/Q6.png)
+
+On voit donc que, contrairement à la question 3, il n'y a plus de paquets ICMP mais des paquets utilisant le protocole ESP.  
+Le ping fonctionne et on voit les messages de debug sur R1.
+
+Notre configuration VPN est donc fonctionnelle.
+
 
 ---
 
@@ -354,7 +366,7 @@ Pensez à démarrer votre sniffer sur la sortie du routeur R2 vers internet avan
 
 ---
 
-**Réponse :**  
+
 
 ---
 
@@ -387,7 +399,7 @@ Nous aurons donc un mode tunnnel.
 
 il est également possible de voir que c'est bien le mode tunnel qui est utilisé en regardant les paquets dans Wireshark. Il est possible de constater que l'entête IP a été modifié.
 
-##Capture à ajouter
+![wireshark](./images/Q9.png)
 
 ---
 
