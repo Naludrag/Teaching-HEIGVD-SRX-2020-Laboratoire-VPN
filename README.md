@@ -359,14 +359,18 @@ Le ping fonctionne et on voit les messages de debug sur R1.
 
 Notre configuration VPN est donc fonctionnelle.
 
-
 ---
 
 **Question 7: Reportez dans votre rapport une petite explication concernant les différents « timers » utilisés par IKE et IPsec dans cet exercice (recherche Web). :**
 
 ---
 
+Deux différents « timers » sont utilisés par IKE et 2 autres timers sont utilisés par IPsec.
 
+Un des timers de IKE est la `lifetime`, il est utilisé afin de renégocier les SA de la phase I. Notre configuration le définit à 30 minutes.  
+Le second timer de IKE est nommé `keepalive`, c'est un timer qui permet de supprimer les SA si aucun paquet n'est transmis dans l'intervalle de temps. Notre configuration est toute les 30 secondes avec 3 essais.
+
+Le premier timer de IPsec changer les SA toutes les 5 minutes (ou après 2.6MB). Le second timer est utilisé afin de supprimer les SA en cas d'inactivité. Notre configuration les supprime après 15 minutes.
 
 ---
 
