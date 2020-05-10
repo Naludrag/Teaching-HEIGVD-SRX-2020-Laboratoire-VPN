@@ -1,5 +1,7 @@
 # Teaching-HEIGVD-SRX-2020-Laboratoire-VPN
 
+***Auteur: Robin Müller, Stéphane Teixeira Carvalho***
+
 **Ce travail de laboratoire est à faire en équipes de 3 personnes**
 
 **Pour ce travail de laboratoire, il est votre responsabilité de chercher vous-même sur internet, le support du cours ou toute autre source (vous avez aussi le droit de communiquer avec les autres équipes), toute information relative au sujet VPN, le logiciel eve-ng, les routeur Cisco, etc que vous ne comprenez pas !**
@@ -108,8 +110,8 @@ Un « protocol » différent de `up` indique la plupart du temps que l’interfa
 
 ---
 
-Nous n'avons pas rencontré de problèmes. Tous les routeurs ont démarrés normalement et ils étaient bien configuré.
-La seul différence est le routeur R2 qui possèdait une interface loopback non-spécifié dans le schéma. Nous ne pensons toutefois pas que cela soit problématique.
+Nous n'avons pas rencontré de problèmes. Tous les routeurs ont démarrés normalement et les configurations étaient correctes.
+La seul différence est que le routeur R2 possèdait une interface loopback non-spécifié dans le schéma. Nous ne pensons toutefois pas que cela soit problématique pour le déroulement du laboratoire.
 
 ---
 
@@ -146,7 +148,7 @@ Pour votre topologie il est utile de contrôler la connectivité entre :
 
 ---
 
-Nous avons juste eu besoin de lancer la commande `ip dhcp` sur le VPC. Une fois cela effectuée, tous les pings sont passés.
+Nous avons juste eu besoin de lancer la commande `ip dhcp` sur le VPC car il n'avait pas d'addresse IP définie. Une fois cela effectuée, tous les pings indiqué ci-dessus sont passés.
 
 ---
 
@@ -173,7 +175,9 @@ La capture d'écran ci-dessous contient la console du VPC, la console de R1 ains
 
 ![Capture question 3](./images/Q3.png)
 
-On voit donc que le ping est envoyé depuis le VPC en transitant par R2. R1 reçoit ensuite les echo requests et répond avec des echo reply.
+On voit donc que le ping est envoyé depuis le VPC en transitant par R2(Echo request). R1 reçoit ensuite les echo requests et répond avec des echo reply. Ces paquets sont également reçus par R2 il est possible de voir cela sur la capture ci-dessus(Echo reply).
+
+Nous avons donc la confirmation que la communication se passe correctement.
 
 ---
 
@@ -244,10 +248,30 @@ Vous pouvez consulter l’état de votre configuration IKE avec les commandes su
 
 ---
 
-La commande nous montre les policy que nous avons mis en place grâce à la commande `crypto isakmp numéro_policy`. On peut donc constater que ce que nous avons comme résultat est bien celui désiré en comparaison avec le tableau représenté ci-dessus.
+La commande permet de voir les policy que nous avons mis en place grâce à la commande `crypto isakmp policy numéro_policy`. On peut donc constater que ce que nous avons comme résultat est bien celui désiré en comparaison avec le tableau représenté ci-dessus.
 
-Nous avons ajoutés une policy supplémentaire pour le routeur R2 avec comme encryption triple DES avec une priorité plus haute mais comme le routeur R1 n'utilise que l'encryption aes seul la policy 20 va être utilisée.  
-En plus de cela la policy 10 n'est pas très performante car nous utilisons du triple DES qui nettement plus lent que AES. Elle n'est aussi pas très fiable car nous utilisons md5 qui est déprécié pour ce genre d'échange. La clé Diffie-Hellman est également plus petite elle est de 1024 bit(`group 2`).
+Voici le résultat pour le routeur R2 :
+
+```
+RX2#show crypto isakmp policy
+
+Global IKE policy
+Protection suite of priority 10
+        encryption algorithm:   Three key triple DES
+        hash algorithm:         Message Digest 5
+        authentication method:  Pre-Shared Key
+        Diffie-Hellman group:   #2 (1024 bit)
+        lifetime:               1800 seconds, no volume limit
+Protection suite of priority 20
+        encryption algorithm:   AES - Advanced Encryption Standard (256 bit keys).
+        hash algorithm:         Secure Hash Standard
+        authentication method:  Pre-Shared Key
+        Diffie-Hellman group:   #5 (1536 bit)
+        lifetime:               1800 seconds, no volume limit
+```
+
+Nous avons ajoutés une policy supplémentaire pour le routeur R2 avec comme chiffrement l'algorithme triple DES avec une priorité plus haute(`10`) mais comme le routeur R1 n'utilise que l'encryption AES seul la policy 20 va être utilisée pour mettre en place l'IKE.  
+En plus de cela la policy 10 n'est pas très performante car nous utilisons du triple DES qui nettement plus lent que AES. Elle n'est aussi pas très fiable car nous utilisons md5 qui est déprécié pour ce genre d'échange. La clé Diffie-Hellman est également plus petite 1024 bit(`group 2`) ce qui est également déprecié.
 
 ---
 
@@ -256,8 +280,22 @@ En plus de cela la policy 10 n'est pas très performante car nous utilisons du t
 
 ---
 
-Cette commande permet de voir les clés configurées sur un routeur.  
-On peut donc voir que la clé `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé. Ce qui est déconseillé en pratique car si la clé est trouvé par une personne tierce il peut dechiffrer tout les paquets qui sont transmis par les deux routeurs.
+Cette commande permet de voir les clés pré-partagées configurées sur un routeur. Voici le résultat pour les 2 routeur R2 et R1:
+```
+RX2#show crypto isakmp key
+Keyring      Hostname/Address                            Preshared Key
+
+default      193.100.100.1                               cisco-1
+
+RX1#show crypto isakmp key
+Keyring      Hostname/Address                            Preshared Key
+
+default      193.200.200.1                               cisco-1
+
+```
+On peut donc voir que la clé par défaut `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé. Ce qui est déconseillé en pratique car si la clé est trouvé par une personne non-desirée il peut déchiffrer tout les paquets qui sont transmis par les deux routeurs.
+
+Les Hostname permettent de définir que tout paquet ayant comme direction l'adresse IP définie doit être chiffré avec la clé définie.
 
 ---
 
@@ -349,15 +387,58 @@ Pensez à démarrer votre sniffer sur la sortie du routeur R2 vers internet avan
 **Question 6: Ensuite faites part de vos remarques dans votre rapport. :**
 
 ---
-
+Pour tester notre configuration nous avons effectué un ping de la mahcine VPC vers l'adresse de loopback du routeur R1.  
 La capture d'écran contient la console du VPC, de R1 et une capture wireshark à la sortie de R2 vers internet.
 
 ![Capture question 6](./images/Q6.png)
 
 On voit donc que, contrairement à la question 3, il n'y a plus de paquets ICMP mais des paquets utilisant le protocole ESP.  
-Le ping fonctionne et on voit les messages de debug sur R1.
+Le ping fonctionne et on voit les messages de debug sur R1. Cela nous prouve donc que nos paquets sont chiffré et que IPSec a bien été mis en place.
 
-Notre configuration VPN est donc fonctionnelle.
+Nous pouvons pousser la vérification en allant regarder les configuartions de routeurs. Voici
+```
+RX2#show crypto map
+Crypto Map IPv4 "MY-CRYPTO" 10 ipsec-isakmp
+        Peer = 193.100.100.1
+        Extended IP access list TO-CRYPT
+            access-list TO-CRYPT permit ip 172.17.1.0 0.0.0.255 172.16.1.0 0.0.0.255
+        Current peer: 193.100.100.1
+        Security association lifetime: 2560 kilobytes/300 seconds
+        Security association idletime: 900 seconds
+        Responder-Only (Y/N): N
+        PFS (Y/N): N
+        Mixed-mode : Disabled
+        Transform sets={
+                STRONG:  { esp-192-aes esp-sha-hmac  } ,
+        }
+        Interfaces using crypto map MY-CRYPTO:
+                Ethernet0/0
+
+        Interfaces using crypto map NiStTeSt1:
+```
+Grâce aux résultats ci-dessus nous voyons donc que la configuration IPSec que nous avons définie est bien défine sur l'interface e0/0 du routeur. La même vérification a été effectuée sur R1.
+```
+RX1#show crypto map
+Crypto Map IPv4 "MY-CRYPTO" 10 ipsec-isakmp
+        Peer = 193.200.200.1
+        Extended IP access list TO-CRYPT
+            access-list TO-CRYPT permit ip 172.16.1.0 0.0.0.255 172.17.1.0 0.0.0.255
+        Current peer: 193.200.200.1
+        Security association lifetime: 2560 kilobytes/300 seconds
+        Security association idletime: 900 seconds
+        Responder-Only (Y/N): N
+        PFS (Y/N): N
+        Mixed-mode : Disabled
+        Transform sets={
+                STRONG:  { esp-192-aes esp-sha-hmac  } ,
+        }
+        Interfaces using crypto map MY-CRYPTO:
+                Ethernet0/0
+
+        Interfaces using crypto map NiStTeSt1:
+```
+
+Nous pouvons alors confirmer que notre configuration VPN est fonctionnelle.
 
 ---
 
@@ -367,10 +448,10 @@ Notre configuration VPN est donc fonctionnelle.
 
 Deux différents « timers » sont utilisés par IKE et 2 autres timers sont utilisés par IPsec.
 
-Un des timers de IKE est la `lifetime`, il est utilisé afin de renégocier les SA de la phase I. Notre configuration le définit à 30 minutes.  
+Un des timers de IKE est la `lifetime`, il est utilisé afin de renégocier les SA de la phase I. Notre configuration le définit à 30 minutes. Ce qui indique alors que au bout de 30 minutes une nouvelle SA est renégociée.  
 Le second timer de IKE est nommé `keepalive`, c'est un timer qui permet de supprimer les SA si aucun paquet n'est transmis dans l'intervalle de temps. Notre configuration est toute les 30 secondes avec 3 essais.
 
-Le premier timer de IPsec changer les SA toutes les 5 minutes (ou après 2.6MB). Le second timer est utilisé afin de supprimer les SA en cas d'inactivité. Notre configuration les supprime après 15 minutes.
+Le premier timer `lifetime` de IPsec changer les SA toutes les 5 minutes (ou après 2.6MB de donnée transitée). Le second timer `idle-time` est utilisé afin de supprimer les SA en cas d'inactivité. Notre configuration les supprime après 15 minutes.
 
 ---
 
@@ -384,7 +465,7 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-IKE a été utilisé pour la mise en place pour l'échange de clé. Puis, ESP a été utilisé pour le chiffrement de la payload du paquet.
+IKE a été utilisé pour la mise en place pour l'échange de clé. Puis, ESP a été utilisé pour le chiffrement de la payload du paquet transmis sur le réseau.
 
 ---
 
@@ -398,10 +479,10 @@ Nous avons configuré le mode tunnnel au moment de la commande `crypto ipsec` po
     crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac
       mode tunnel
 
-Comme cette commande a été lancée sur le routeur R2, le routeur R1 va également l'utilsé lors de la communication.
-Nous aurons donc un mode tunnnel.
+Comme cette commande a été lancée sur le routeur R2, le routeur R1 va également l'utilsé lors de la communication. Ils vont décidé de cela lors de la transmission des possibilités de chaque routeur.
+Nous aurons donc un mode tunnel.
 
-il est également possible de voir que c'est bien le mode tunnel qui est utilisé en regardant les paquets dans Wireshark. Il est possible de constater que l'entête IP a été modifié.
+Il est également possible de voir que c'est bien le mode tunnel qui est utilisé en regardant les paquets avec l'aide de Wireshark. Il est possible de constater que l'entête IP a été modifié l'adresse source et destination du paquet de base ont été modifiées.
 
 ![wireshark](./images/Q9.png)
 
@@ -416,6 +497,8 @@ Tout le contenu original du paquet est chiffré(Entête IP, entête TCP et les d
 
 Le chiffrement utilisé est AES-192 ce qui nous indique que nous uilisons AES avec une clé de 192 bits.
 
+Nous pouvons affirmer cela car nous avons définie cela avec la commande crypto `ipsec transform-set STRONG esp-aes 192 esp-sha-hmac`
+
 ---
 
 
@@ -423,7 +506,7 @@ Le chiffrement utilisé est AES-192 ce qui nous indique que nous uilisons AES av
 
 ---
 
-Encore une fois comme nous utilisons le mode Tunnel tout le paquet initial va être authentifié ainsi que le header ESP. Comme nous utilisons ESP nous avons repris le schéma du cours pour répondre à cette question.
+Encore une fois comme nous utilisons le mode Tunnel tout le paquet initial va être authentifié ainsi que le header ESP. Comme nous utilisons ESP nous avons repris le schéma du cours pour répondre à cette question. Ce schéma démontre bien les parties du paquets qui sont authentifiés.
 
 ![](./images/Question11.PNG)
 
@@ -437,6 +520,6 @@ Pour l'authentification nous avons mis en place l'algorithme `HMAC-SHA1`. Nous p
 ---
 
 Toutes les parties du paquets vont être intègre sauf la nouvelle entête IP.  
-Le protocol utilisé est le même que pour l'autentification(`HMAC-SHA1`) et cela va permettre de mettre en place la partie ICV(Integrity Check Value) dans le paquet IP pour vérifier l'intégrité.
+Le protocol utilisé est le même que pour l'autentification(`HMAC-SHA1`) et cela va permettre de mettre en place la partie ICV(Integrity Check Value) dans le paquet IP pour vérifier l'intégrité de celui-ci.
 
 ---
