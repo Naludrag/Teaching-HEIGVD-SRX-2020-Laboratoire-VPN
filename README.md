@@ -259,7 +259,7 @@ Voici le résultat pour le routeur R1 et R2 :
 Nous avons ajoutés une policy supplémentaire pour le routeur R2 avec comme chiffrement l'algorithme triple DES avec une priorité plus haute(`10`) mais comme le routeur R1 n'utilise que l'encryption AES seul la policy 20 va être utilisée pour mettre en place l'IKE.  
 En plus de cela la policy 10 n'est pas très performante car nous utilisons du triple DES qui est nettement plus lent qu'AES. Elle n'est aussi pas très fiable car nous utilisons md5 qui est déprécié pour ce genre d'échange. La clé Diffie-Hellman est également plus petite 1024 bit(`group 2`) ce qui est également déprecié.
 
-De nos jours la configuration Diffie-Hellman mise en place sur la policy 10 est également dépricé car il est conseillé d'avoir au minimum 2048 bits.
+De nos jours la configuration Diffie-Hellman mise en place sur la policy 10 est également dépricé car il est conseillé d'avoir au minimum une clé de 2048 bits.
 
 ---
 
@@ -273,9 +273,10 @@ Cette commande permet de voir les clés pré-partagées configurées sur un rout
 
 ![Capture question 5 R2](./images/CryptoIsakmpKey_R2.PNG)
 
-On peut donc voir que la clé par défaut `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé. Ce qui est déconseillé en pratique car si la clé est trouvé par une personne non-desirée il peut déchiffrer tout les paquets qui sont transmis par les deux routeurs.
+On peut donc voir que la clé par défaut `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé cela est obligatoire pour utiliser le mode `pre-shared`. Ces clés vont nous permettre d'avoir un secret, en plus du secret partagées avec Diffie-Hellman, entre les 2 routeurs pour vérifier l'autentification entre ceux-ci. Si la clé partagée est retrouvée dans le paquet reçu par un des routeur on sait que le paquet est authentique.    
+Cette technique a des défauts car si nous avons N routeurs différents nous devrions avoir les clés des N routeurs avec qui nous voulons emttre en place IKE ce qui n'est pas très pratique.
 
-Les Hostname permettent de définir que tout paquet ayant comme direction l'adresse IP définie doit être chiffré avec la clé définie.
+Les Hostname permettent de définir que tout paquet, ayant comme direction l'adresse IP définie, doit être chiffré avec la clé définie.
 
 ---
 
