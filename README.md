@@ -250,28 +250,16 @@ Vous pouvez consulter l’état de votre configuration IKE avec les commandes su
 
 La commande permet de voir les policy que nous avons mis en place grâce à la commande `crypto isakmp policy numéro_policy`. On peut donc constater que ce que nous avons comme résultat est bien celui désiré en comparaison avec le tableau représenté ci-dessus.
 
-Voici le résultat pour le routeur R2 :
+Voici le résultat pour le routeur R1 et R2 :
 
-```
-RX2#show crypto isakmp policy
+![Capture question 4 R1](./images/CryptoIsakmp_R1.PNG)
 
-Global IKE policy
-Protection suite of priority 10
-        encryption algorithm:   Three key triple DES
-        hash algorithm:         Message Digest 5
-        authentication method:  Pre-Shared Key
-        Diffie-Hellman group:   #2 (1024 bit)
-        lifetime:               1800 seconds, no volume limit
-Protection suite of priority 20
-        encryption algorithm:   AES - Advanced Encryption Standard (256 bit keys).
-        hash algorithm:         Secure Hash Standard
-        authentication method:  Pre-Shared Key
-        Diffie-Hellman group:   #5 (1536 bit)
-        lifetime:               1800 seconds, no volume limit
-```
+![Capture question 4 R2](./images/CryptoIsakmp_R2.PNG)
 
 Nous avons ajoutés une policy supplémentaire pour le routeur R2 avec comme chiffrement l'algorithme triple DES avec une priorité plus haute(`10`) mais comme le routeur R1 n'utilise que l'encryption AES seul la policy 20 va être utilisée pour mettre en place l'IKE.  
-En plus de cela la policy 10 n'est pas très performante car nous utilisons du triple DES qui est nettement plus lent que AES. Elle n'est aussi pas très fiable car nous utilisons md5 qui est déprécié pour ce genre d'échange. La clé Diffie-Hellman est également plus petite 1024 bit(`group 2`) ce qui est également déprecié.
+En plus de cela la policy 10 n'est pas très performante car nous utilisons du triple DES qui est nettement plus lent qu'AES. Elle n'est aussi pas très fiable car nous utilisons md5 qui est déprécié pour ce genre d'échange. La clé Diffie-Hellman est également plus petite 1024 bit(`group 2`) ce qui est également déprecié.
+
+De nos jours la configuration Diffie-Hellman mise en place sur la policy 10 est également dépricé car il est conseillé d'avoir au minimum une clé de 2048 bits.
 
 ---
 
@@ -280,22 +268,15 @@ En plus de cela la policy 10 n'est pas très performante car nous utilisons du t
 
 ---
 
-Cette commande permet de voir les clés pré-partagées configurées sur un routeur. Voici le résultat pour les 2 routeur R2 et R1:
-```
-RX2#show crypto isakmp key
-Keyring      Hostname/Address                            Preshared Key
+Cette commande permet de voir les clés pré-partagées configurées sur un routeur. Voici le résultat pour les 2 routeurs R2 et R1:
+![Capture question 5 R1](./images/CryptoIsakmpKey_R1.PNG)
 
-default      193.100.100.1                               cisco-1
+![Capture question 5 R2](./images/CryptoIsakmpKey_R2.PNG)
 
-RX1#show crypto isakmp key
-Keyring      Hostname/Address                            Preshared Key
+On peut donc voir que la clé par défaut `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé cela est obligatoire pour utiliser le mode `pre-shared`. Ces clés vont nous permettre d'avoir un secret, en plus du secret partagées avec Diffie-Hellman, entre les 2 routeurs pour vérifier l'autentification entre ceux-ci. Si la clé partagée est retrouvée dans le paquet reçu par un des routeur on sait que le paquet est authentique.    
+Cette technique a des défauts car si nous avons N routeurs différents nous devrions avoir les clés des N routeurs avec qui nous voulons emttre en place IKE ce qui n'est pas très pratique.
 
-default      193.200.200.1                               cisco-1
-
-```
-On peut donc voir que la clé par défaut `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé. Ce qui est déconseillé en pratique car si la clé est trouvé par une personne non-desirée il peut déchiffrer tout les paquets qui sont transmis par les deux routeurs.
-
-Les Hostname permettent de définir que tout paquet ayant comme direction l'adresse IP définie doit être chiffré avec la clé définie.
+Les Hostname permettent de définir que tout paquet, ayant comme direction l'adresse IP définie, doit être chiffré avec la clé définie.
 
 ---
 
@@ -387,7 +368,16 @@ Pensez à démarrer votre sniffer sur la sortie du routeur R2 vers internet avan
 **Question 6: Ensuite faites part de vos remarques dans votre rapport. :**
 
 ---
-Pour tester notre configuration nous avons effectué un ping de la mahcine VPC vers l'adresse de loopback du routeur R1.  
+Lors de la configuration nous avons obtenus les warnings suivants :
+
+```
+Warning! Lifetime value of 2560 KB is lower than the recommended optimum value of 102400 KB
+Warning! Lifetime value of 300 sec is lower than the recommended optimum value of 900 sec
+```
+
+Ces 2 warnings nous indiquent que les valeurs que nous avons choisis pour le temps de vie d'une SA sont trop basses. A cause de cela, nous changeront donc très souvent de SA ce qui n'est pas très optimisée mais dans le cadre du labo nous pensons que cela ne dérange pas.
+
+Nous avons ensuite testé notre configuration en effectuant un ping de la mahcine VPC vers l'adresse de loopback du routeur R1.  
 La capture d'écran contient la console du VPC, de R1 et une capture wireshark à la sortie de R2 vers internet.
 
 ![Capture question 6](./images/Q6.png)
@@ -395,7 +385,7 @@ La capture d'écran contient la console du VPC, de R1 et une capture wireshark �
 On voit donc que, contrairement à la question 3, il n'y a plus de paquets ICMP mais des paquets utilisant le protocole ESP.  
 Le ping fonctionne et on voit les messages de debug sur R1. Cela nous prouve donc que nos paquets sont chiffrés et que IPSec a bien été mis en place.
 
-Nous pouvons pousser la vérification en allant regarder les configuartions de routeurs.
+Nous pouvons pousser la vérification en allant regarder les configurations de routeurs. Voici la configuration pour le routeur R2 :
 ```
 RX2#show crypto map
 Crypto Map IPv4 "MY-CRYPTO" 10 ipsec-isakmp
@@ -465,7 +455,9 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 
 ---
 
-IKE a été utilisé pour la mise en place pour l'échange de clé. Puis, ESP a été utilisé pour le chiffrement de la payload du paquet transmis sur le réseau.
+IKE a été utilisé pour la mise en place de l'échange de clé. Nous pouvons confirmer cela car les commandes `crypto isakmp` que nous avons tapées permettent de définir et mettre en place IKE.
+
+Nous avons également utilisé ESP pour le chiffrement de la payload du paquet transmis sur le réseau. Nous avons pu vérifier cela grâce à la capture prise lors de la question 6 mais également car nous avons effectuée la commande `crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac` qui dans les 2 cas(chiffrement et authentification) utilise ESP.
 
 On peut bien voir ci-desous que les protocoles sont ISKMP (qui fait partie de IKE) ainsi que ESP :
 
@@ -483,10 +475,10 @@ Nous avons configuré le mode tunnnel au moment de la commande `crypto ipsec` po
     crypto ipsec transform-set STRONG esp-aes 192 esp-sha-hmac
       mode tunnel
 
-Comme cette commande a été lancée sur le routeur R2, le routeur R1 va également l'utilsé lors de la communication. Ils vont décidé de cela lors de la transmission des possibilités de chaque routeur.
+Comme cette commande a été lancée sur le routeur R2, le routeur R1 va également l'utilsé lors de la communication. Ils vont décidé de cela lors de la transmission des possibilités de chaque routeur dans la phase 2 d'IKE.
 Nous aurons donc un mode tunnel.
 
-Il est également possible de voir que c'est bien le mode tunnel qui est utilisé en regardant les paquets avec l'aide de Wireshark. Il est possible de constater que l'entête IP a été modifié l'adresse source et destination du paquet de base ont été modifiées.
+Il est également possible de voir que c'est bien le mode tunnel qui est utilisé en regardant les paquets avec l'aide de Wireshark. Il est possible de constater que l'entête IP a été modifié, L'adresse de source et de destination du paquet de base ont été modifiées.
 
 ![wireshark](./images/Q9.png)
 
@@ -524,6 +516,6 @@ Pour l'authentification nous avons mis en place l'algorithme `HMAC-SHA1`. Nous p
 ---
 
 Toutes les parties du paquets vont être intègre sauf la nouvelle entête IP.  
-Le protocol utilisé est le même que pour l'autentification(`HMAC-SHA1`) et cela va permettre de mettre en place la partie ICV(Integrity Check Value) dans le paquet IP pour vérifier l'intégrité de celui-ci.
+Le protocol utilisé est le même que pour l'autentification(`HMAC-SHA1`) et cela va permettre de mettre en place la partie ICV(Integrity Check Value) dans le paquet IP pour vérifier l'intégrité de celui-ci(s'appelle ESP auth sur le schéma de la question 11).
 
 ---
