@@ -250,25 +250,11 @@ Vous pouvez consulter l’état de votre configuration IKE avec les commandes su
 
 La commande permet de voir les policy que nous avons mis en place grâce à la commande `crypto isakmp policy numéro_policy`. On peut donc constater que ce que nous avons comme résultat est bien celui désiré en comparaison avec le tableau représenté ci-dessus.
 
-Voici le résultat pour le routeur R2 :
+Voici le résultat pour le routeur R1 et R2 :
 
-```
-RX2#show crypto isakmp policy
+![Capture question 4 R1](./images/CryptoIsakmp_R1.PNG)
 
-Global IKE policy
-Protection suite of priority 10
-        encryption algorithm:   Three key triple DES
-        hash algorithm:         Message Digest 5
-        authentication method:  Pre-Shared Key
-        Diffie-Hellman group:   #2 (1024 bit)
-        lifetime:               1800 seconds, no volume limit
-Protection suite of priority 20
-        encryption algorithm:   AES - Advanced Encryption Standard (256 bit keys).
-        hash algorithm:         Secure Hash Standard
-        authentication method:  Pre-Shared Key
-        Diffie-Hellman group:   #5 (1536 bit)
-        lifetime:               1800 seconds, no volume limit
-```
+![Capture question 4 R2](./images/CryptoIsakmp_R2.PNG)
 
 Nous avons ajoutés une policy supplémentaire pour le routeur R2 avec comme chiffrement l'algorithme triple DES avec une priorité plus haute(`10`) mais comme le routeur R1 n'utilise que l'encryption AES seul la policy 20 va être utilisée pour mettre en place l'IKE.  
 En plus de cela la policy 10 n'est pas très performante car nous utilisons du triple DES qui est nettement plus lent qu'AES. Elle n'est aussi pas très fiable car nous utilisons md5 qui est déprécié pour ce genre d'échange. La clé Diffie-Hellman est également plus petite 1024 bit(`group 2`) ce qui est également déprecié.
@@ -283,18 +269,10 @@ De nos jours la configuration Diffie-Hellman mise en place sur la policy 10 est 
 ---
 
 Cette commande permet de voir les clés pré-partagées configurées sur un routeur. Voici le résultat pour les 2 routeurs R2 et R1:
-```
-RX2#show crypto isakmp key
-Keyring      Hostname/Address                            Preshared Key
+![Capture question 5 R1](./images/CryptoIsakmpKey_R1.PNG)
 
-default      193.100.100.1                               cisco-1
+![Capture question 5 R2](./images/CryptoIsakmpKey_R2.PNG)
 
-RX1#show crypto isakmp key
-Keyring      Hostname/Address                            Preshared Key
-
-default      193.200.200.1                               cisco-1
-
-```
 On peut donc voir que la clé par défaut `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé. Ce qui est déconseillé en pratique car si la clé est trouvé par une personne non-desirée il peut déchiffrer tout les paquets qui sont transmis par les deux routeurs.
 
 Les Hostname permettent de définir que tout paquet ayant comme direction l'adresse IP définie doit être chiffré avec la clé définie.
