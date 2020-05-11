@@ -271,7 +271,7 @@ Protection suite of priority 20
 ```
 
 Nous avons ajoutés une policy supplémentaire pour le routeur R2 avec comme chiffrement l'algorithme triple DES avec une priorité plus haute(`10`) mais comme le routeur R1 n'utilise que l'encryption AES seul la policy 20 va être utilisée pour mettre en place l'IKE.  
-En plus de cela la policy 10 n'est pas très performante car nous utilisons du triple DES qui nettement plus lent que AES. Elle n'est aussi pas très fiable car nous utilisons md5 qui est déprécié pour ce genre d'échange. La clé Diffie-Hellman est également plus petite 1024 bit(`group 2`) ce qui est également déprecié.
+En plus de cela la policy 10 n'est pas très performante car nous utilisons du triple DES qui est nettement plus lent que AES. Elle n'est aussi pas très fiable car nous utilisons md5 qui est déprécié pour ce genre d'échange. La clé Diffie-Hellman est également plus petite 1024 bit(`group 2`) ce qui est également déprecié.
 
 ---
 
@@ -393,9 +393,9 @@ La capture d'écran contient la console du VPC, de R1 et une capture wireshark �
 ![Capture question 6](./images/Q6.png)
 
 On voit donc que, contrairement à la question 3, il n'y a plus de paquets ICMP mais des paquets utilisant le protocole ESP.  
-Le ping fonctionne et on voit les messages de debug sur R1. Cela nous prouve donc que nos paquets sont chiffré et que IPSec a bien été mis en place.
+Le ping fonctionne et on voit les messages de debug sur R1. Cela nous prouve donc que nos paquets sont chiffrés et que IPSec a bien été mis en place.
 
-Nous pouvons pousser la vérification en allant regarder les configuartions de routeurs. Voici
+Nous pouvons pousser la vérification en allant regarder les configuartions de routeurs.
 ```
 RX2#show crypto map
 Crypto Map IPv4 "MY-CRYPTO" 10 ipsec-isakmp
@@ -449,9 +449,9 @@ Nous pouvons alors confirmer que notre configuration VPN est fonctionnelle.
 Deux différents « timers » sont utilisés par IKE et 2 autres timers sont utilisés par IPsec.
 
 Un des timers de IKE est la `lifetime`, il est utilisé afin de renégocier les SA de la phase I. Notre configuration le définit à 30 minutes. Ce qui indique alors que au bout de 30 minutes une nouvelle SA est renégociée.  
-Le second timer de IKE est nommé `keepalive`, c'est un timer qui permet de supprimer les SA si aucun paquet n'est transmis dans l'intervalle de temps. Notre configuration est toute les 30 secondes avec 3 essais.
+Le second timer de IKE est nommé `keepalive`, c'est un timer qui permet de supprimer les SA si aucun paquet n'est transmis dans l'intervalle de temps. Notre configuration est toute les 30 secondes mais avec 3 essais.
 
-Le premier timer `lifetime` de IPsec changer les SA toutes les 5 minutes (ou après 2.6MB de donnée transitée). Le second timer `idle-time` est utilisé afin de supprimer les SA en cas d'inactivité. Notre configuration les supprime après 15 minutes.
+Le premier timer `lifetime` de IPsec change les SA toutes les 5 minutes (ou après 2.6MB de donnée transitée). Le second timer `idle-time` est utilisé afin de supprimer les SA en cas d'inactivité. Notre configuration les supprime après 15 minutes.
 
 ---
 
@@ -466,6 +466,10 @@ En vous appuyant sur les notions vues en cours et vos observations en laboratoir
 ---
 
 IKE a été utilisé pour la mise en place pour l'échange de clé. Puis, ESP a été utilisé pour le chiffrement de la payload du paquet transmis sur le réseau.
+
+On peut bien voir ci-desous que les protocoles sont ISKMP (qui fait partie de IKE) ainsi que ESP :
+
+![Question8](./images/Q8.png)
 
 ---
 
