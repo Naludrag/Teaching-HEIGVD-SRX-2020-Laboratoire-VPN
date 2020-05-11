@@ -274,7 +274,7 @@ Cette commande permet de voir les clés pré-partagées configurées sur un rout
 ![Capture question 5 R2](./images/CryptoIsakmpKey_R2.PNG)
 
 On peut donc voir que la clé par défaut `cisco-1` est configuré sur les 2 routeurs. Les routeurs auront donc la même clé cela est obligatoire pour utiliser le mode `pre-shared`. Ces clés vont nous permettre d'avoir un secret, en plus du secret partagées avec Diffie-Hellman, entre les 2 routeurs pour vérifier l'autentification entre ceux-ci. Si la clé partagée est retrouvée dans le paquet reçu par un des routeur on sait que le paquet est authentique.    
-Cette technique a des défauts car si nous avons N routeurs différents nous devrions avoir les clés des N routeurs avec qui nous voulons emttre en place IKE ce qui n'est pas très pratique.
+Cette technique a des défauts car si nous avons N routeurs différents nous devrions avoir les clés des N routeurs avec qui nous voulons mettre en place IKE ce qui n'est pas très pratique.
 
 Les Hostname permettent de définir que tout paquet, ayant comme direction l'adresse IP définie, doit être chiffré avec la clé définie.
 
@@ -511,7 +511,7 @@ Pour l'authentification nous avons mis en place l'algorithme `HMAC-SHA1`. Nous p
 
 ---
 
-Toutes les parties du paquets vont être intègre sauf la nouvelle entête IP.  
+Toutes les parties du paquets vont être intègre sauf la nouvelle entête IP. Donc tout les parties du paquet qui sont authentifiées.  
 Le protocol utilisé est le même que pour l'autentification(`HMAC-SHA1`) et cela va permettre de mettre en place la partie ICV(Integrity Check Value) dans le paquet IP pour vérifier l'intégrité de celui-ci(s'appelle ESP auth sur le schéma de la question 11).
 
 ---
